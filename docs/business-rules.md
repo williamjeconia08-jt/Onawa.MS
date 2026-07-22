@@ -16,6 +16,7 @@ The MVP must support:
 - User management.
 - Product catalogue management.
 - Product categories.
+- Default currency: Namibian dollars (N$).
 - Barcode lookup, including multiple barcodes per product.
 - VAT-inclusive product pricing.
 - Stock-tracked normal products.
@@ -170,12 +171,14 @@ Each product should have:
 - Product name.
 - Category.
 - Selling price.
-- Cost price where applicable.
+- Cost price, which is optional and defaults to N$0.00 when not provided.
 - Product type.
 - Active or inactive status.
 - VAT behavior.
 - Stock threshold where applicable.
 - Supplier relationship where applicable.
+
+Product quantities should use whole numbers in the MVP. Decimal quantities are not required at launch.
 
 ### 5.2 Product Status Rules
 
@@ -202,6 +205,7 @@ Normal stock products:
 - Can be transferred to smaller branches.
 - Can be damaged or expired.
 - Must not normally allow negative stock.
+- May have an optional cost price that defaults to N$0.00 if not entered.
 
 ### 5.5 Internal Production Stock Product Rules
 
@@ -210,6 +214,7 @@ Internal production stock products, especially bread:
 - Are produced by the business internally.
 - Are received into the shop from the internal bakery.
 - Are stock-tracked.
+- Use whole-number quantities in the MVP.
 - Can be sold to customers.
 - Can be transferred to smaller branches.
 - Can expire or be written off.
@@ -222,6 +227,7 @@ Non-stock service or digital items, especially airtime:
 - Do not increase or decrease physical inventory.
 - Can be sold through POS.
 - Should be reportable separately from physical product sales.
+- May appear on the same receipt as physical products, but must be categorized separately in receipts and reports.
 - Should not be received through supplier stock receiving or bakery receiving.
 
 ## 6. Barcodes
@@ -255,6 +261,7 @@ Non-stock service or digital items, especially airtime:
 ### 7.2 Tax-Inclusive Pricing Rules
 
 - The selling price shown to customers already includes VAT.
+- Prices and totals should use Namibian dollars (N$) by default.
 - The customer must not be charged selling price plus VAT.
 - For reporting, the system should calculate the VAT portion from the VAT-inclusive total.
 
@@ -275,8 +282,10 @@ A normal sale:
 - Uses one payment method in MVP.
 - May use cash, card, or mobile payment.
 - Must produce a VAT-inclusive receipt.
+- Must include receipt number, cashier name, business registration details, and business address once those business details are configured.
 - Must reduce stock immediately for stock-tracked products.
 - Must not reduce stock for non-stock service/digital items.
+- May include airtime on the same receipt as physical products, but airtime must be categorized differently from physical stock items.
 
 ### 8.2 Sale Completion Rules
 
@@ -288,6 +297,7 @@ A normal sale:
 
 - The MVP supports cash, card, and mobile payments.
 - Split payments are not supported in MVP.
+- Partial payments for unpaid sales are not supported in MVP.
 - Daily reports must separate totals by payment method.
 
 ### 8.4 Anonymous Customer Rules
@@ -317,6 +327,7 @@ An unpaid sale must:
 - Only a manager can mark an unpaid sale as paid.
 - Marking an unpaid sale as paid must record the date/time and responsible manager.
 - Marking an unpaid sale as paid must record the payment method used.
+- Unpaid sales must be settled in full; partial payment is not supported in the MVP.
 - The original unpaid sale details must remain unchanged.
 
 ### 9.4 Unpaid Sale Reporting Rules
@@ -417,6 +428,7 @@ Supplier records should include:
 - Receiving stock from a supplier must increase inventory.
 - Receiving records must preserve purchase history.
 - Receiving records should capture quantity, cost, supplier, date/time, user, and optional document reference.
+- Cost is optional and should default to N$0.00 when not entered.
 - Bread must not use normal supplier receiving in MVP.
 
 ## 13. Internal Bakery Receiving
@@ -460,10 +472,12 @@ A branch transfer:
 - The system must not track smaller branch stock levels in MVP.
 - The system must not track smaller branch sales in MVP.
 - Inactive branches must not be selectable for new transfers.
+- Launch branch destinations are Oshandi, Ondangwa, and Omundaungilo. Additional branch destinations may be added later.
 
 ### 14.4 Transfer Correction Rules
 
 - Transfer corrections must be traceable.
+- Inventory clerks may record branch transfers, but once a transfer is saved, they must not correct it without manager approval.
 - Corrections should record who made the correction, when, and why.
 - Corrections must not make branch transfers appear as sales.
 
@@ -486,7 +500,7 @@ Damage and expiry records should include:
 - Entry date/time.
 - Person who recorded it.
 - Optional note.
-- Approval information if required.
+- Manager approval, which is always required for damage and expiry records.
 
 ### 15.3 Reporting Rules
 
@@ -509,6 +523,7 @@ The system should support:
 - Stock count corrections must be traceable.
 - Corrections should record expected quantity, counted quantity, variance, user, date/time, and reason.
 - Sensitive corrections may require manager approval.
+- Saved branch transfer corrections require manager approval.
 
 ## 17. Deactivation and Deletion
 
@@ -537,7 +552,7 @@ Sales reports should include:
 - Sales by payment method.
 - Refunds.
 - VAT totals.
-- Physical product sales versus airtime sales.
+- Physical product sales versus airtime sales, even when airtime appears on the same receipt.
 
 ### 18.2 Inventory Reports
 
@@ -566,7 +581,7 @@ Purchase reports should include:
 
 - Stock received.
 - Purchases by supplier.
-- Cost history where useful.
+- Cost history where useful, using N$ as the default currency.
 
 ### 18.5 User Activity Reports
 
@@ -593,6 +608,7 @@ If the system is unavailable:
 - Event time means when the business event actually happened.
 - Entry time means when the record was entered into the system.
 - Reports should be able to distinguish back-entered records when needed.
+- Daily reports should use 9:30 PM as the default reporting cutoff time. This cutoff should be configurable because the business may adjust it later.
 
 ### 19.3 Rollout Validation Rules
 
@@ -622,22 +638,32 @@ The purpose is to prove that Onawa is reliable enough to become the official sou
 | Offline features become overbuilt | Use manual fallback and back-entered records |
 | Inventory quantity cannot be explained | Use movement-based inventory with clear movement types |
 
-## 21. Open Questions Before Data Model Design
+## 21. Confirmed Configuration Decisions
 
-These questions should be answered before finalizing the data model:
+The following planning questions have been answered and should guide the data model and workflow design:
 
-1. What currency should the system use by default?
-2. Should product quantities support decimals, or only whole numbers?
-3. Should cost price be required for all stock-tracked products?
-4. Should inventory clerks be allowed to correct branch transfers without manager approval?
-5. Should damage and expiry always require manager approval, or only above a quantity/value threshold?
-6. Should unpaid sales allow partial later payment in the future, even though split payments are out of MVP?
-7. Should receipts include business registration details, address, cashier name, and receipt number?
-8. Should airtime be included on the same receipt as physical products, or handled as a separate sale type?
-9. What exact branch destination names should be configured at launch?
-10. What is the preferred daily reporting cutoff time?
+1. Default currency is Namibian dollars (N$).
+2. Product quantities use whole numbers in the MVP. Decimal quantities are not required at launch.
+3. Cost price is optional for stock-tracked products and should default to N$0.00 when not provided.
+4. Inventory clerks may record branch transfers, but they must not correct already-saved branch transfers without manager approval.
+5. Damage and expiry records always require manager approval.
+6. Unpaid sales do not support partial later payment in the MVP. They must be settled in full.
+7. Receipts should include business registration details, business address, cashier name, and receipt number.
+8. Airtime may be included on the same receipt as physical products, but it must be categorized separately.
+9. Launch branch destinations are Oshandi, Ondangwa, and Omundaungilo. Additional branch destinations may be added later.
+10. The default daily reporting cutoff time is 9:30 PM. This should be adjustable later.
 
-## 22. Next Planning Deliverables
+## 22. Remaining Open Questions Before Data Model Design
+
+These questions still need confirmation before implementation details are finalized:
+
+1. What are the official business registration details and address to show on receipts?
+2. What exact user accounts should be created first for owner, managers, cashiers, and inventory clerks?
+3. Should manager approval happen by manager login/password confirmation at the cashier screen, or only by a manager using their own account separately?
+4. Should stock count corrections always require manager approval, or only when the variance is above a certain quantity/value?
+5. Should VAT values be rounded per line item or only at receipt total level?
+
+## 23. Next Planning Deliverables
 
 After this Business Rules Document, the recommended next deliverables are:
 
